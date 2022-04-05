@@ -18,6 +18,7 @@ client.on('ready', () => {
 const admins = ['596227913209217024']; // users ids that allowed to use '!send' command
 const submitChannel = '960942616667648052' // Channel id for submitted forms
 const embedChannel = '960944053149642792' // Channel id for embed to sent to
+const staffRoles = ['899989194884153344', '899987560808452146'] // staff roles when member accepted will get roles automatically
 
 client.on('messageCreate', (message) => {
     if (message.content === '!send') {
@@ -41,8 +42,9 @@ client.on('messageCreate', (message) => {
     }
 })
 
-client.on('interactionCreate', (interaction) => {
+client.on('interactionCreate', async (interaction) => {
     if (interaction.isButton()) {
+        // show modal
         if (interaction.customId === 'apply') {
             const modal = new ModalBuilder()
             .setTitle('Staff Application')
@@ -78,6 +80,40 @@ client.on('interactionCreate', (interaction) => {
     
             modal.addComponents(...rows);
             interaction.showModal(modal);
+            // end of modal
+        }
+
+        // Accept and deny buttons
+        if (interaction.customId === 'staff_accept') {
+            // TODO: save user id in json or sum instead of getting id from embed footer
+            const getIdFromFooter = interaction.message.embeds[0].footer.text;
+            const getMember = await interaction.guild.members.fetch(getIdFromFooter);
+            await getMember.roles.add(staffRoles).catch((err) => {
+                console.error(err)
+                return interaction.reply({
+                    content: ":x: There was an error when a try to add roles for the user."
+                })
+            });
+            interaction.reply({
+                content: `✅ Added roles for **${getMember.user.tag}**, Accepted by ${interaction.user.tag}`
+            })
+            await getMember.send({
+                content: `Hey ${getMember.user.tag}, You have been accepted for staff application. 🎉 **congratulations** 🎉`
+            }).catch(() => {
+                return interaction.message.reply(':x: There was an error when i try to send message to the user.')
+            })
+        }
+        if (interaction.customId === 'staff_deny') {
+            // TODO: save user id in json or sum instead of getting id from embed footer
+            const getIdFromFooter = interaction.message.embeds[0].footer.text;
+            const getMember = await interaction.guild.members.fetch(getIdFromFooter);
+            // TODO: add modal for reason of rejection
+            await getMember.send({
+                content: `Hey ${getMember.user.tag} sorry you have been rejected for staff application.`
+            }).catch(e => {})
+            interaction.reply({
+                content: `:x: ${getMember.user.tag} has been rejected by ${interaction.user.tag}.`
+            })
         }
     }
     if (interaction.isModalSubmit()) {
@@ -97,7 +133,43 @@ client.on('interactionCreate', (interaction) => {
             })
             const staffSubmitChannel = interaction.guild.channels.cache.get(submitChannel);
             if (!staffSubmitChannel) return;
-            staffSubmitChannel.send(`**New Application from ${interaction.user} (\`${interaction.user.id}\`)**\n\nStaff name: ${staffName}\nStaff Age: ${staffAge}\nWhy you should be staff?: ${staffWhyYou}`)
+            const embed = new EmbedBuilder()
+            .setAuthor({ name: interaction.user.tag, iconURL: interaction.user.displayAvatarURL() })
+            .setColor('Blue')
+            .setTimestamp()
+            .setFooter({ text: interaction.user.id })
+            .setThumbnail(interaction.user.displayAvatarURL())
+            .addFields(
+                {
+                    name: "Name:",
+                    value: staffName
+                },
+                {
+                    name: "Age:",
+                    value: staffAge
+                },
+                {
+                    name: "Why you should be staff here:",
+                    value: staffWhyYou
+                }
+            )
+            const row = new ActionRowBuilder()
+            .addComponents(
+                new ButtonBuilder()
+                .setCustomId('staff_accept')
+                .setLabel('Accept')
+                .setStyle(ButtonStyle.Success)
+            )
+            .addComponents(
+                new ButtonBuilder()
+                .setCustomId('staff_deny')
+                .setLabel('Deny')
+                .setStyle(ButtonStyle.Danger)
+            )
+            staffSubmitChannel.send({
+                embeds: [embed],
+                components: [row]
+            })
         }
     }
 })
