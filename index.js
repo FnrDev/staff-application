@@ -9,20 +9,16 @@ const {
     TextInputBuilder
 } = require('discord.js');
 const client = new Client({ intents: ['Guilds', 'MessageContent', 'GuildMessages'] });
+const config = require('./config.json');
 require('dotenv').config();
 
 client.on('ready', () => {
     console.log(`Logged in as ${client.user.tag}`);
 })
 
-const admins = ['596227913209217024']; // users ids that allowed to use '!send' command
-const submitChannel = '960942616667648052' // Channel id for submitted forms
-const embedChannel = '960944053149642792' // Channel id for embed to sent to
-const staffRoles = ['899989194884153344', '899987560808452146'] // staff roles when member accepted will get roles automatically
-
 client.on('messageCreate', (message) => {
     if (message.content === '!send') {
-        if (!admins.includes(message.author.id)) return;
+        if (!config.admins.includes(message.author.id)) return;
         const embed = new EmbedBuilder()
         .setTitle('Apply for Staff')
         .setDescription('Click the button blow to apply for staff')
@@ -34,7 +30,8 @@ client.on('messageCreate', (message) => {
             .setLabel('Apply')
             .setCustomId('apply')
         )
-        const channel = message.guild.channels.cache.get(embedChannel);
+        const channel = message.guild.channels.cache.get(config.embedChannel);
+        if (!channel) return;
         channel.send({
             embeds: [embed],
             components: [row]
@@ -88,7 +85,7 @@ client.on('interactionCreate', async (interaction) => {
             // TODO: save user id in json or sum instead of getting id from embed footer
             const getIdFromFooter = interaction.message.embeds[0].footer.text;
             const getMember = await interaction.guild.members.fetch(getIdFromFooter);
-            await getMember.roles.add(staffRoles).catch((err) => {
+            await getMember.roles.add(config.staffRoles).catch((err) => {
                 console.error(err)
                 return interaction.reply({
                     content: ":x: There was an error when a try to add roles for the user."
@@ -131,7 +128,7 @@ client.on('interactionCreate', async (interaction) => {
                 content: '✅ Your staff application has been submit successfully.',
                 ephemeral: true
             })
-            const staffSubmitChannel = interaction.guild.channels.cache.get(submitChannel);
+            const staffSubmitChannel = interaction.guild.channels.cache.get(config.submitChannel);
             if (!staffSubmitChannel) return;
             const embed = new EmbedBuilder()
             .setAuthor({ name: interaction.user.tag, iconURL: interaction.user.displayAvatarURL() })
