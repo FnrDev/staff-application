@@ -104,7 +104,6 @@ client.on('interactionCreate', async (interaction) => {
             // TODO: save user id in json or sum instead of getting id from embed footer
             const getIdFromFooter = interaction.message.embeds[0].footer.text;
             const getMember = await interaction.guild.members.fetch(getIdFromFooter);
-            // TODO: add modal for reason of rejection
             await getMember.send({
                 content: `Hey ${getMember.user.tag} sorry you have been rejected for staff application.`
             }).catch(e => {})
@@ -121,6 +120,12 @@ client.on('interactionCreate', async (interaction) => {
             if (isNaN(staffAge)) {
                 return interaction.reply({
                     content: ":x: Your age must be a number, please resend the form.",
+                    ephemeral: true
+                })
+            }
+            if (!isNaN(staffName)) {
+                return interaction.reply({
+                    content: ":x: Your name must not includes a number.",
                     ephemeral: true
                 })
             }
