@@ -99,10 +99,26 @@ client.on('interactionCreate', async (interaction) => {
             }).catch(() => {
                 return interaction.message.reply(':x: There was an error when i try to send message to the user.')
             })
+            const newDisabledRow = new ActionRowBuilder()
+            .setComponents(
+                new ButtonBuilder()
+                .setCustomId('staff_accept_ended')
+                .setDisabled()
+                .setStyle(ButtonStyle.Success)
+                .setLabel('Accept')
+            )
+            .addComponents(
+                new ButtonBuilder()
+                .setCustomId('staff_deny_ended')
+                .setDisabled()
+                .setStyle(ButtonStyle.Danger)
+                .setLabel('Deny')
+            )
+            interaction.message.edit({ components: [newDisabledRow] })
         }
         if (interaction.customId === 'staff_deny') {
             // TODO: save user id in json or sum instead of getting id from embed footer
-            const getIdFromFooter = interaction.message.embeds[0].footer.text;
+            const getIdFromFooter = interaction.message.embeds[0].footer?.text;
             const getMember = await interaction.guild.members.fetch(getIdFromFooter);
             await getMember.send({
                 content: `Hey ${getMember.user.tag} sorry you have been rejected for staff application.`
@@ -110,6 +126,22 @@ client.on('interactionCreate', async (interaction) => {
             interaction.reply({
                 content: `:x: ${getMember.user.tag} has been rejected by ${interaction.user.tag}.`
             })
+            const newDisabledRow = new ActionRowBuilder()
+            .setComponents(
+                new ButtonBuilder()
+                .setCustomId('staff_accept_ended')
+                .setDisabled()
+                .setStyle(ButtonStyle.Success)
+                .setLabel('Accept')
+            )
+            .addComponents(
+                new ButtonBuilder()
+                .setCustomId('staff_deny_ended')
+                .setDisabled()
+                .setStyle(ButtonStyle.Danger)
+                .setLabel('Deny')
+            )
+            interaction.message.edit({ components: [newDisabledRow] })
         }
     }
     if (interaction.isModalSubmit()) {
@@ -172,6 +204,12 @@ client.on('interactionCreate', async (interaction) => {
                 embeds: [embed],
                 components: [row]
             })
+        }
+
+        // contact user modal
+        if (interaction.customId === 'staff_contact_modal') {
+            console.log(interaction.fields.getTextInputValue('staff_message_modal'))
+            
         }
     }
 })
