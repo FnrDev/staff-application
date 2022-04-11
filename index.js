@@ -53,6 +53,7 @@ client.on('interactionCreate', async (interaction) => {
             .setMinLength(2)
             .setMaxLength(25)
             .setRequired(true)
+            .setPlaceholder('Ahmed')
             .setStyle(TextInputStyle.Short)
     
             const ageComponent = new TextInputBuilder()
@@ -61,6 +62,7 @@ client.on('interactionCreate', async (interaction) => {
             .setMinLength(1)
             .setMaxLength(3)
             .setStyle(TextInputStyle.Short)
+            .setPlaceholder('18')
             .setRequired(true)
     
             const whyYou = new TextInputBuilder()
@@ -69,6 +71,7 @@ client.on('interactionCreate', async (interaction) => {
             .setMinLength(10)
             .setMaxLength(120)
             .setStyle(TextInputStyle.Paragraph)
+            .setPlaceholder(`Tell us the reason for wanting to be staff in ${interaction.guild.name}`)
             .setRequired(true)
     
             const rows = [nameComponent, ageComponent, whyYou].map(
