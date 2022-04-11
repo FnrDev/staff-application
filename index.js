@@ -205,12 +205,6 @@ client.on('interactionCreate', async (interaction) => {
                 components: [row]
             })
         }
-
-        // contact user modal
-        if (interaction.customId === 'staff_contact_modal') {
-            console.log(interaction.fields.getTextInputValue('staff_message_modal'))
-            
-        }
     }
 })
 
